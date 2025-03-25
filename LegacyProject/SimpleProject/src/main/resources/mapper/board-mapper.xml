@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.kh.spring.board.model.mapper.BoardMapper">
+
+	<sql id="boardColumn">
+		SELECT
+			  BOARD_NO boardNo
+			, BOARD_TITLE boardTitle
+			, BOARD_WRITER boardWriter
+			, COUNT
+			, TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') as createDate
+			, CHANGE_NAME changeName
+	</sql>
+	
+	<insert id="insertBoard"
+			parameterType="boardDTO">
+		INSERT INTO
+			TB_SPRING_BOARD
+			(
+			BOARD_TITLE
+			, BOARD_CONTENT
+			, BOARD_WRITER
+			, CHANGE_NAME
+			)
+		VALUES
+			(
+			#{boardTitle}
+			, #{boardContent}
+			, #{boardWriter}
+			, #{changeName}
+			)
+	</insert>
+	
+	
+	<select id="selectBoardList"
+			resultType="boardDTO">
+		SELECT
+			  BOARD_NO boardNo
+			, BOARD_TITLE boardTitle
+			, BOARD_WRITER boardWriter
+			, COUNT
+			, TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') as createDate
+			, CHANGE_NAME changeName
+		FROM
+			TB_SPRING_BOARD
+		WHERE
+			STATUS = 'Y'
+		ORDER BY
+			BOARD_NO DESC
+	</select>
+	
+	<!-- 1절하기 -->
+	<select id="selectBoard"
+			parameterType="_int"
+			resultType="boardDTO">
+		<include refid="boardColumn"/>
+			, BOARD_CONTENT boardContent
+		FROM
+			TB_SPRING_BOARD
+		WHERE
+			STATUS = 'Y'
+		AND 
+			BOARD_NO = #{boardNo}
+	</select>
+	
+	<!-- 2절하기 -->
+	<select id="selectReply"
+			parameterType="_int"
+			resultType="replyDTO">
+		SELECT
+			  REPLY_NO replyNo
+			, REPLY_WRITER replyWriter
+			, REPLY_CONTENT replyContent
+			, CREATE_DATE createDate
+			, REF_BOARD_NO refBoardNo
+		FROM
+			TB_REPLY
+		WHERE
+			REF_BOARD_NO = #{boardNo}
+		ORDER BY
+			replyNo DESC		
+	</select>
+	
+	<resultMap id="boardResultSet"
+			   type="boardDTO">
+		<id column="boardNo" property="boardNo"/>
+		<result column="boardTitle" property="boardTitle"/>
+		<result column="boardContent" property="boardContent"/>
+		<result column="boardWriter" property="boardWriter"/>
+		<result column="boardCreateDate" property="createDate"/>
+		<result column="changeName" property="changeName"/>
+		<collection property="replyList" ofType="replyDTO">
+			<id column="replyNo" property="replyNo"/>
+			<result column="replyWriter" property="replyWriter"/>
+			<result column="replyContent" property="replyContent"/>
+			<result column="refBoardNo" property="refBoardNo"/>
+			<result column="createDate" property="createDate"/>
+		</collection>
+		
+	</resultMap>
+	
+	<select id="selectBoardAndReply"
+			parameterType="_int"
+			resultMap="boardResultSet">
+		SELECT
+			BOARD_NO boardNo
+			, BOARD_TITLE boardTitle
+			, BOARD_Content boardContent
+			, BOARD_WRITER boardWriter
+			, TB_SPRING_BOARD.CREATE_DATE boardCreateDate
+			, CHANGE_NAME changeName
+			, REPLY_NO replyNo
+			, REPLY_WRITER replyWriter
+			, REPLY_CONTENT replyContent
+			, REF_BOARD_NO refBoardNo
+			, TB_REPLY.CREATE_DATE createDate
+		FROM
+			TB_SPRING_BOARD
+		LEFT JOIN
+			TB_REPLY ON(BOARD_NO = REF_BOARD_NO)
+		WHERE
+			BOARD_NO = #{boardNo}
+	</select>
+	
+
+	<select id="searchedCount" parameterType="hashmap" resultType="_int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_SPRING_BOARD
+		WHERE
+			STATUS = 'Y'
+		<if test="condition == 'writer'">
+			AND 
+				BOARD_WRITER  
+		</if>
+		<if test="condition == 'title'">
+			AND 
+				BOARD_TITLE 
+		</if>
+		<if test="condition == 'content'">
+			AND 
+				BOARD_CONTENT 
+		</if>
+			LIKE '%' || #{keyword} || '%'
+	</select>
+	
+	<select id="selectSearchList" parameterType="hashmap"
+		resultType="boardDTO">
+		<include refid="boardColumn"/>
+		FROM
+			TB_SPRING_BOARD
+		WHERE
+			STATUS = 'Y'
+		<choose>
+			<when test="condition == 'writer'">
+				AND BOARD_WRITER
+			</when>
+			<when test="condition == 'content'">
+				AND BOARD_CONTENT
+			</when>
+			<otherwise>
+				AND BOARD_TITLE
+			</otherwise>
+		</choose>	
+				LIKE '%' || #{keyword} || '%'
+		ORDER BY
+			BOARD_NO DESC
+	</select>
+	
+	<insert id="insertReply" parameterType="replyDTO">
+		INSERT INTO
+			TB_REPLY
+		VALUES
+			(
+			SEQ_RNO.NEXTVAL
+			, #{replyWriter}
+			, #{replyContent}
+			, SYSDATE
+			, #{refBoardNo}
+				)
+	</insert>
+	
+			
+</mapper>

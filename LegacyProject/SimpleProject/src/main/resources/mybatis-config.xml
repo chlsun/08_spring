@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="com.kh.spring.member.model.dto.MemberDTO" alias="memberDTO"/>
+		<typeAlias type="com.kh.spring.board.model.dto.BoardDTO" alias="boardDTO"/>
+		<typeAlias type="com.kh.spring.reply.model.dto.ReplyDTO" alias="replyDTO"/>
+	</typeAliases>
+	
+	<!-- 
+		environments, dataSource => DB연결정보
+		
+		객체를 생성!!
+	 -->
+	 <!-- 1. xml의 bean태그를 이용한 등록 
+	 		-> root-context.xml파일에 작성  -->
+	 		
+	<mappers>
+		<mapper resource="/mapper/member-mapper.xml"/>
+		<mapper resource="/mapper/board-mapper.xml"/>
+	</mappers>
+	
+
+</configuration>

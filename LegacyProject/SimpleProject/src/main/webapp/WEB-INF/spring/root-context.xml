@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- * root-context.xml
+		 서버 구동과 동시에 web.xml파일을 거쳐서 로딩되는 문서 == preloading
+		 => 서버가 구동되면서 세팅되어야하는(Bean등록) 내용들을 작성 (DB접속, 트랜잭션처리, 외부모듈연결 등등...)
+		 Bean == Spring이 생명주기를 관리하는 객체
+	-->	
+	<bean class="org.apache.commons.dbcp.BasicDataSource"
+		  id="dataSource"
+		  destroy-method="close">
+		  <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+		  <property name="url" value="jdbc:oracle:thin:@112.221.156.34:12345:XE"/>
+		  <property name="username" value="KH26_CYS"/>
+		  <property name="password" value="KH1234"/>
+	</bean>
+	
+	<!-- 
+		내부적으로는 이렇게 도는거임
+		
+		DataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+		dataSource.setUrl("jdbc:oracle:thin:@112.221.156.34:12345:XE");
+		dataSource.setUserName("KH26_CYS");
+		dataSource.setPassword("KH1234");
+	 -->
+	 
+	 <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+	 	<property name="configLocation" value="classpath:mybatis-config.xml"/>
+	 	<property name="dataSource" ref="dataSource" />	   
+	 </bean>
+	 
+	 <bean class="org.mybatis.spring.SqlSessionTemplate" id="sqlSession">
+	 	<constructor-arg ref="sqlSessionFactory" />
+	 </bean>
+	 
+	  <mybatis-spring:scan base-package="com.kh.spring.member.model.dao, com.kh.spring.board.model.mapper"/>
+	 
+	 <!-- 파일업로드 관련 빈 등록 -->
+	 <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver">
+	 	<property name="maxUploadSize" value="100000000" />
+	 	<property name="maxInMemorySize" value="100000000" />
+	 </bean>
+	 
+	 <!-- 
+	 	SqlSession sqlSession = new SqlSessionTemplate(sqlSessionFactory);
+	  -->
+	  
+
+</beans>
