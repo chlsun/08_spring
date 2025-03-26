@@ -30,4 +30,10 @@ public class APISafetyController {
 	public String requestMessage(@RequestParam(name="pageNo") int pageNo) {
 		return safetyService.requestMessage(pageNo);
 	}
+	
+	
+	@GetMapping(value="naver-shopping")
+	public String getItems(@RequestParam(name="query") String query) {
+		return safetyService.getItems(query);
+	}
 }
